@@ -1,0 +1,190 @@
+name: CD Pipeline
+
+on:
+  workflow_run:
+    workflows: ["CI Pipeline"]
+    branches: [main]
+    types: [completed]
+
+jobs:
+  deploy:
+    name: Deploy to Kubernetes
+    runs-on: ubuntu-latest
+    if: ${{ github.event.workflow_run.conclusion == 'success' }}
+    
+    steps:
+    - name: Checkout code
+      uses: actions/checkout@v3
+      
+    - name: Configure AWS credentials
+      uses: aws-actions/configure-aws-credentials@v2
+      with:
+        aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
+        aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+        aws-region: ${{ secrets.AWS_REGION }}
+        
+    - name: Login to Amazon ECR
+      id: login-ecr
+      uses: aws-actions/amazon-ecr-login@v1
+      
+    - name: Download image URI
+      uses: dawidd6/action-download-artifact@v2
+      with:
+        workflow: ci.yaml
+        name: image-uri
+        path: .
+        
+    - name: Set image URI
+      id: image-uri
+      run: echo "::set-output name=uri::$(cat image-uri.txt)"
+      
+    - name: Update kubeconfig
+      run: aws eks update-kubeconfig --region ${{ secrets.AWS_REGION }} --name ${{ secrets.EKS_CLUSTER_NAME }}
+      
+    - name: Update Kubernetes manifests
+      run: |
+        # Replace the image placeholder with the actual image URI
+        sed -i "s|\${ECR_REPOSITORY_URI}|${{ steps.image-uri.outputs.uri }}|g" k8s/deployment.yaml
+        
+    - name: Deploy to Kubernetes
+      run: |
+        kubectl apply -f k8s/namespace.yaml
+        kubectl apply -f k8s/configmap.yaml
+        kubectl apply -f k8s/secret.yaml
+        kubectl apply -f k8s/deployment.yaml
+        kubectl apply -f k8s/service.yaml
+        kubectl apply -f k8s/ingress.yaml
+        kubectl apply -f k8s/hpa.yaml
+        
+    - name: Verify deployment
+      run: |
+        kubectl rollout status deployment/ecommerce-api -n ecommerce --timeout=180s
+        
+  canary:
+    name: Canary Deployment
+    needs: deploy
+    runs-on: ubuntu-latest
+    
+    steps:
+    - name: Checkout code
+      uses: actions/checkout@v3
+      
+    - name: Configure AWS credentials
+      uses: aws-actions/configure-aws-credentials@v2
+      with:
+        aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
+        aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+        aws-region: ${{ secrets.AWS_REGION }}
+        
+    - name: Update kubeconfig
+      run: aws eks update-kubeconfig --region ${{ secrets.AWS_REGION }} --name ${{ secrets.EKS_CLUSTER_NAME }}
+      
+    - name: Download image URI
+      uses: dawidd6/action-download-artifact@v2
+      with:
+        workflow: ci.yaml
+        name: image-uri
+        path: .
+        
+    - name: Set image URI
+      id: image-uri
+      run: echo "::set-output name=uri::$(cat image-uri.txt)"
+      
+    - name: Create canary deployment
+      run: |
+        # Create a canary deployment with 20% traffic
+        cat <<EOF | kubectl apply -f -
+        apiVersion: apps/v1
+        kind: Deployment
+        metadata:
+          name: ecommerce-api-canary
+          namespace: ecommerce
+          labels:
+            app: ecommerce-api
+            version: canary
+        spec:
+          replicas: 1
+          selector:
+            matchLabels:
+              app: ecommerce-api
+              version: canary
+          template:
+            metadata:
+              labels:
+                app: ecommerce-api
+                version: canary
+              annotations:
+                prometheus.io/scrape: "true"
+                prometheus.io/path: "/metrics"
+                prometheus.io/port: "5000"
+            spec:
+              containers:
+              - name: ecommerce-api
+                image: ${{ steps.image-uri.outputs.uri }}
+                ports:
+                - containerPort: 5000
+                  name: http
+                envFrom:
+                - configMapRef:
+                    name: ecommerce-api-config
+                - secretRef:
+                    name: ecommerce-api-secret
+                livenessProbe:
+                  httpGet:
+                    path: /health
+                    port: 5000
+                  initialDelaySeconds: 30
+                  periodSeconds: 10
+                readinessProbe:
+                  httpGet:
+                    path: /health
+                    port: 5000
+                  initialDelaySeconds: 5
+                  periodSeconds: 5
+        EOF
+        
+        # Update service to include canary pods
+        cat <<EOF | kubectl apply -f -
+        apiVersion: v1
+        kind: Service
+        metadata:
+          name: ecommerce-api
+          namespace: ecommerce
+          labels:
+            app: ecommerce-api
+        spec:
+          type: ClusterIP
+          ports:
+          - port: 80
+            targetPort: 5000
+            protocol: TCP
+            name: http
+          selector:
+            app: ecommerce-api
+        EOF
+        
+    - name: Monitor canary deployment
+      run: |
+        # Wait for canary deployment to be ready
+        kubectl rollout status deployment/ecommerce-api-canary -n ecommerce --timeout=180s
+        
+        # Monitor for 5 minutes
+        echo "Monitoring canary deployment for 5 minutes..."
+        sleep 300
+        
+        # Check if there are any errors in the canary deployment
+        CANARY_ERRORS=$(kubectl logs -l app=ecommerce-api,version=canary -n ecommerce --tail=100 | grep -i error | wc -l)
+        
+        if [ "$CANARY_ERRORS" -gt 5 ]; then
+          echo "Too many errors in canary deployment. Rolling back."
+          kubectl delete deployment/ecommerce-api-canary -n ecommerce
+          exit 1
+        else
+          echo "Canary deployment successful. Promoting to production."
+          # Update the main deployment to use the new image
+          kubectl set image deployment/ecommerce-api -n ecommerce ecommerce-api=${{ steps.image-uri.outputs.uri }}
+          kubectl rollout status deployment/ecommerce-api -n ecommerce --timeout=180s
+          
+          # Remove canary deployment
+          kubectl delete deployment/ecommerce-api-canary -n ecommerce
+        fi
