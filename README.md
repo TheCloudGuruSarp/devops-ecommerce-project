@@ -1,4 +1,4 @@
-# E-Ticaret DevOps Projesi
+# DevOps E-commerce Project
 
 ✨ **Developed by Sarper** ✨
 
@@ -202,6 +202,7 @@ Bu proje MIT lisansı altında lisanslanmıştır - detaylar için [LICENSE](LIC
 
 ## İletişim
 
-Proje Sahibi - [GitHub Profiliniz](https://github.com/yourusername)
+Proje Sahibi - [Sarper](https://github.com/TheCloudGuruSarp)
 
-Proje Linki: [https://github.com/yourusername/devops-ecommerce-project](https://github.com/yourusername/devops-ecommerce-project)
+Proje Linki: [https://github.com/TheCloudGuruSarp/devops-ecommerce-project](https://github.com/TheCloudGuruSarp/devops-ecommerce-project)
+

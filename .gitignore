@@ -4,7 +4,6 @@ __pycache__/
 *$py.class
 *.so
 .Python
-env/
 build/
 develop-eggs/
 dist/
@@ -16,6 +15,7 @@ lib64/
 parts/
 sdist/
 var/
+wheels/
 *.egg-info/
 .installed.cfg
 *.egg
@@ -25,65 +25,25 @@ venv/
 env/
 ENV/
 
-# Unit test / coverage reports
-htmlcov/
-.tox/
-.coverage
-.coverage.*
-.cache
-nosetests.xml
-coverage.xml
-*.cover
-.hypothesis/
-
-# Flask
-instance/
-.webassets-cache
-
-# Terraform
-**/.terraform/*
-*.tfstate
-*.tfstate.*
-*.tfvars
-crash.log
-override.tf
-override.tf.json
-*_override.tf
-*_override.tf.json
-.terraformrc
-terraform.rc
-
 # IDE
 .idea/
 .vscode/
 *.swp
 *.swo
 
-# OS specific
-.DS_Store
-.DS_Store?
-._*
-.Spotlight-V100
-.Trashes
-ehthumbs.db
-Thumbs.db
+# Terraform
+.terraform/
+*.tfstate
+*.tfstate.backup
+*.tfvars
 
 # Logs
-logs
+logs/
 *.log
-npm-debug.log*
-yarn-debug.log*
-yarn-error.log*
 
-# Docker
-.dockerignore
-
-# Kubernetes
-kubeconfig
-
-# Environment variables
+# Local development
 .env
 .env.local
-.env.development.local
-.env.test.local
-.env.production.local
+
+# OS specific
+.DS_Store
