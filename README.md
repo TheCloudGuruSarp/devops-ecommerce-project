@@ -9,44 +9,44 @@
 ![Terraform](https://img.shields.io/badge/Infrastructure-Terraform-purple)
 ![Monitoring](https://img.shields.io/badge/Monitoring-Prometheus-orange)
 
-## Proje Hakkında
+## About the Project
 
-Bu proje, modern DevOps pratiklerini kullanarak basit bir e-ticaret uygulamasının geliştirilmesi, dağıtımı ve yönetimini göstermektedir. Proje, CI/CD pipeline'ları, konteynerizasyon, altyapı yönetimi ve izleme çözümlerini içermektedir.
+This project demonstrates the development, deployment, and management of a simple e-commerce application using modern DevOps practices. The project includes CI/CD pipelines, containerization, infrastructure management, and monitoring solutions.
 
-## Proje Bileşenleri
+## Project Components
 
-### 1. Uygulama
-- Flask ile geliştirilmiş basit bir e-ticaret API'si
-- Ürün listeleme, sipariş oluşturma ve kullanıcı yönetimi özellikleri
-- Docker ile konteynerize edilmiş
-- RESTful API tasarımı
+### 1. Application
+- Simple e-commerce API developed with Flask
+- Features for product listing, order creation, and user management
+- Containerized with Docker
+- RESTful API design
 
-### 2. Altyapı Yönetimi (Terraform)
-- Kubernetes Cluster (EKS) oluşturma
-- Load Balancer (AWS ALB) yapılandırması
-- S3 bucket oluşturma (statik dosyalar ve yedekler için)
-- IAM rolleri ve izinleri
-- Modüler Terraform yapısı
+### 2. Infrastructure Management (Terraform)
+- Kubernetes Cluster (EKS) creation
+- Load Balancer (AWS ALB) configuration
+- S3 bucket creation (for static files and backups)
+- IAM roles and permissions
+- Modular Terraform structure
 
 ### 3. CI/CD Pipeline (GitHub Actions)
-- Otomatik test ve build süreçleri
-- Docker image oluşturma ve ECR'ye push etme
-- Kubernetes'e otomatik deployment
-- Canary deployment stratejisi
+- Automated testing and build processes
+- Docker image creation and pushing to ECR
+- Automated deployment to Kubernetes
+- Canary deployment strategy
 
-### 4. Kubernetes Orkestrasyonu
-- Deployment, Service ve Ingress yapılandırmaları
-- ConfigMap ve Secret yönetimi
-- Horizontal Pod Autoscaler (HPA) ile otomatik ölçeklendirme
+### 4. Kubernetes Orchestration
+- Deployment, Service, and Ingress configurations
+- ConfigMap and Secret management
+- Horizontal Pod Autoscaler (HPA) for automatic scaling
 - NGINX Ingress Controller
 
-### 5. Monitoring ve Logging
-- Prometheus ile metrik toplama
-- Grafana ile görselleştirme
-- Alertmanager ile uyarı yönetimi
-- Loki ile log yönetimi
+### 5. Monitoring and Logging
+- Metric collection with Prometheus
+- Visualization with Grafana
+- Alert management with Alertmanager
+- Log management with Loki
 
-## Mimari Diyagram
+## Architecture Diagram
 
 ```
 ┌─────────────────┐     ┌─────────────────┐     ┌─────────────────┐
@@ -74,31 +74,31 @@ Bu proje, modern DevOps pratiklerini kullanarak basit bir e-ticaret uygulamasın
                                                 └─────────────────┘
 ```
 
-## Kurulum ve Çalıştırma
+## Setup and Running
 
-### Ön Koşullar
-- Docker ve Docker Compose
+### Prerequisites
+- Docker and Docker Compose
 - Kubernetes CLI (kubectl)
 - Terraform
 - AWS CLI
 - Python 3.8+
 
-### Yerel Geliştirme
+### Local Development
 
 ```bash
-# Uygulamayı yerel olarak çalıştırma
+# Run the application locally
 cd app
 python -m venv venv
 source venv/bin/activate  # Windows: venv\Scripts\activate
 pip install -r requirements.txt
 python app.py
 
-# Docker ile çalıştırma
+# Run with Docker
 docker build -t ecommerce-api:latest .
 docker run -p 5000:5000 ecommerce-api:latest
 ```
 
-### Altyapı Oluşturma
+### Infrastructure Creation
 
 ```bash
 cd infrastructure
@@ -107,7 +107,7 @@ terraform plan
 terraform apply
 ```
 
-### Kubernetes'e Deployment
+### Kubernetes Deployment
 
 ```bash
 cd k8s
@@ -120,7 +120,7 @@ kubectl apply -f ingress.yaml
 kubectl apply -f hpa.yaml
 ```
 
-### Monitoring Kurulumu
+### Monitoring Setup
 
 ```bash
 cd monitoring
@@ -130,79 +130,78 @@ kubectl apply -f grafana/
 
 ## CI/CD Pipeline
 
-GitHub Actions pipeline'ı aşağıdaki adımları otomatik olarak gerçekleştirir:
+The GitHub Actions pipeline automatically performs the following steps:
 
-1. Kod değişikliği push edildiğinde testleri çalıştırır
-2. Testler başarılı olursa Docker image oluşturur
-3. Image'ı ECR'ye push eder
-4. Kubernetes manifest dosyalarını günceller
-5. Uygulamayı Kubernetes'e deploy eder
+1. Runs tests when code changes are pushed
+2. Creates a Docker image if tests are successful
+3. Pushes the image to ECR
+4. Updates Kubernetes manifest files
+5. Deploys the application to Kubernetes
 
 ## Monitoring
 
 ### Grafana Dashboards
 
-Proje, Kubernetes kümesinin ve uygulamanın sağlığını izlemek için kapsamlı Grafana dashboardları içerir.
+The project includes comprehensive Grafana dashboards for monitoring the health of the Kubernetes cluster and the application.
 
 ### Prometheus Alerts
 
-Örnek alert kuralları:
-- Yüksek CPU kullanımı (>80%)
-- Yüksek bellek kullanımı (>80%)
-- Yüksek hata oranı (>5%)
-- Servis yanıt süresi (>2s)
+Example alert rules:
+- High CPU usage (>80%)
+- High memory usage (>80%)
+- High error rate (>5%)
+- Service response time (>2s)
 
-## Proje Yapısı
+## Project Structure
 
 ```
-├── app/                    # Uygulama kodu
-│   ├── api/                # API endpoint'leri
-│   ├── models/             # Veri modelleri
-│   ├── tests/              # Birim testleri
-│   ├── Dockerfile          # Uygulama container yapılandırması
-│   └── requirements.txt    # Python bağımlılıkları
+├── app/                    # Application code
+│   ├── api/                # API endpoints
+│   ├── models/             # Data models
+│   ├── tests/              # Unit tests
+│   ├── Dockerfile          # Application container configuration
+│   └── requirements.txt    # Python dependencies
 │
-├── infrastructure/         # Terraform kodları
-│   ├── modules/            # Terraform modülleri
-│   │   ├── eks/           # EKS cluster modülü
-│   │   ├── networking/    # VPC, subnet vb.
-│   │   └── storage/       # S3 bucket modülü
-│   ├── main.tf            # Ana Terraform yapılandırması
-│   └── variables.tf       # Terraform değişkenleri
+├── infrastructure/         # Terraform code
+│   ├── modules/            # Terraform modules
+│   │   ├── eks/           # EKS cluster module
+│   │   ├── networking/    # VPC, subnet, etc.
+│   │   └── storage/       # S3 bucket module
+│   ├── main.tf            # Main Terraform configuration
+│   └── variables.tf       # Terraform variables
 │
-├── k8s/                    # Kubernetes manifest dosyaları
-│   ├── deployment.yaml     # Uygulama deployment
-│   ├── service.yaml        # Servis yapılandırması
-│   ├── ingress.yaml        # Ingress yapılandırması
-│   ├── configmap.yaml      # Yapılandırma değerleri
-│   ├── secret.yaml         # Gizli değerler
+├── k8s/                    # Kubernetes manifest files
+│   ├── deployment.yaml     # Application deployment
+│   ├── service.yaml        # Service configuration
+│   ├── ingress.yaml        # Ingress configuration
+│   ├── configmap.yaml      # Configuration values
+│   ├── secret.yaml         # Secret values
 │   └── hpa.yaml            # Horizontal Pod Autoscaler
 │
-├── .github/workflows/      # GitHub Actions workflow dosyaları
+├── .github/workflows/      # GitHub Actions workflow files
 │   ├── ci.yaml             # Continuous Integration
 │   └── cd.yaml             # Continuous Deployment
 │
-└── monitoring/             # Monitoring yapılandırmaları
-    ├── prometheus/         # Prometheus yapılandırması
-    ├── grafana/            # Grafana dashboard'ları
-    └── alertmanager/       # Alert kuralları
+└── monitoring/             # Monitoring configurations
+    ├── prometheus/         # Prometheus configuration
+    ├── grafana/            # Grafana dashboards
+    └── alertmanager/       # Alert rules
 ```
 
-## Katkıda Bulunma
+## Contributing
 
-1. Bu repository'yi fork edin
-2. Feature branch'i oluşturun (`git checkout -b feature/amazing-feature`)
-3. Değişikliklerinizi commit edin (`git commit -m 'Add some amazing feature'`)
-4. Branch'inizi push edin (`git push origin feature/amazing-feature`)
-5. Pull Request oluşturun
+1. Fork this repository
+2. Create a feature branch (`git checkout -b feature/amazing-feature`)
+3. Commit your changes (`git commit -m 'Add some amazing feature'`)
+4. Push your branch (`git push origin feature/amazing-feature`)
+5. Create a Pull Request
 
-## Lisans
+## License
 
-Bu proje MIT lisansı altında lisanslanmıştır - detaylar için [LICENSE](LICENSE) dosyasına bakın.
+This project is licensed under the MIT License - see the [LICENSE](LICENSE) file for details.
 
-## İletişim
+## Contact
 
-Proje Sahibi - [Sarper](https://github.com/TheCloudGuruSarp)
+Project Owner - [Sarper](https://github.com/TheCloudGuruSarp)
 
-Proje Linki: [https://github.com/TheCloudGuruSarp/devops-ecommerce-project](https://github.com/TheCloudGuruSarp/devops-ecommerce-project)
-
+Project Link: [https://github.com/TheCloudGuruSarp/devops-ecommerce-project](https://github.com/TheCloudGuruSarp/devops-ecommerce-project)
