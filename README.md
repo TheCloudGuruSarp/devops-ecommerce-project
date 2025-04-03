@@ -1,5 +1,9 @@
 # E-Ticaret DevOps Projesi
 
+✨ **Developed by Sarper** ✨
+
+---
+
 ![DevOps Pipeline](https://img.shields.io/badge/DevOps-Pipeline-blue)
 ![Kubernetes](https://img.shields.io/badge/Kubernetes-Ready-brightgreen)
 ![Terraform](https://img.shields.io/badge/Infrastructure-Terraform-purple)
@@ -138,7 +142,7 @@ GitHub Actions pipeline'ı aşağıdaki adımları otomatik olarak gerçekleşti
 
 ### Grafana Dashboards
 
-![Grafana Dashboard](docs/images/grafana-dashboard.png)
+Proje, Kubernetes kümesinin ve uygulamanın sağlığını izlemek için kapsamlı Grafana dashboardları içerir.
 
 ### Prometheus Alerts
 
